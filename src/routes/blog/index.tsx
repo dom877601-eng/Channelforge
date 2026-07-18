@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { blogPosts } from "~/data/blog-posts";
+import { capturePostHog } from "~/lib/analytics";
 
 export const Route = createFileRoute("/blog/")({
   component: BlogIndex,
@@ -51,7 +52,18 @@ function BlogIndex() {
                   ))}
                 </div>
                 <h2 className="mt-3 text-xl font-bold text-brand-900 transition-colors group-hover:text-accent-600 sm:text-2xl">
-                  <Link to="/blog/$slug" params={{ slug: post.slug }}>
+                  <Link
+                    to="/blog/$slug"
+                    params={{ slug: post.slug }}
+                    onClick={() =>
+                      capturePostHog("channelforge_blog_post_clicked", {
+                        post_slug: post.slug,
+                        post_title: post.title,
+                        post_tags: post.tags,
+                        click_location: "title",
+                      })
+                    }
+                  >
                     {post.title}
                   </Link>
                 </h2>
@@ -63,10 +75,28 @@ function BlogIndex() {
                     to="/blog/$slug"
                     params={{ slug: post.slug }}
                     className="inline-flex items-center gap-1 text-sm font-semibold text-accent-600 transition-colors hover:text-accent-700"
+                    onClick={() =>
+                      capturePostHog("channelforge_blog_post_clicked", {
+                        post_slug: post.slug,
+                        post_title: post.title,
+                        post_tags: post.tags,
+                        click_location: "read_more",
+                      })
+                    }
                   >
                     Read more
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                      />
                     </svg>
                   </Link>
                 </div>

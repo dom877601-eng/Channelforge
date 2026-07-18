@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { capturePostHog, getUtmParams } from "~/lib/analytics";
 
 export const Route = createFileRoute("/services")({
   component: Services,
@@ -17,8 +18,18 @@ const services = [
       "Monthly strategy reviews",
     ],
     icon: (
-      <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <svg
+        className="h-8 w-8"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
       </svg>
     ),
   },
@@ -34,8 +45,18 @@ const services = [
       "SEO-optimized writing",
     ],
     icon: (
-      <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+      <svg
+        className="h-8 w-8"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+        />
       </svg>
     ),
   },
@@ -51,8 +72,18 @@ const services = [
       "Performance reporting",
     ],
     icon: (
-      <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" />
+      <svg
+        className="h-8 w-8"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"
+        />
       </svg>
     ),
   },
@@ -68,8 +99,18 @@ const services = [
       "Monthly strategy presentations",
     ],
     icon: (
-      <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+      <svg
+        className="h-8 w-8"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
+        />
       </svg>
     ),
   },
@@ -89,8 +130,8 @@ function Services() {
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-300">
             Everything you need to execute your marketing — from strategy to
-            content to measurement — under one roof. No freelancer
-            coordination. No agency runaround.
+            content to measurement — under one roof. No freelancer coordination.
+            No agency runaround.
           </p>
         </div>
       </section>
@@ -100,18 +141,30 @@ function Services() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 md:grid-cols-3">
             <div className="card flex flex-col">
-              <h3 className="text-lg font-semibold text-brand-900">Marketing retainer — Essential</h3>
+              <h3 className="text-lg font-semibold text-brand-900">
+                Marketing retainer — Essential
+              </h3>
               <p className="mt-1 text-3xl font-bold text-brand-800">
-                $2,000<span className="text-base font-normal text-gray-500">/mo</span>
+                $2,000
+                <span className="text-base font-normal text-gray-500">/mo</span>
               </p>
               <p className="mt-2 text-sm text-gray-600 flex-1">
-                Strategy, content, and measurement for one core channel. Best for startups getting started with consistent marketing.
+                Strategy, content, and measurement for one core channel. Best
+                for startups getting started with consistent marketing.
               </p>
               <a
                 href="https://buy.stripe.com/fZudR95s28wJfjIa9Z3sI00"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary mt-4 w-full text-center text-sm"
+                onClick={() =>
+                  capturePostHog("channelforge_pricing_plan_clicked", {
+                    plan_name: "Marketing retainer — Essential",
+                    plan_price: 2000,
+                    plan_interval: "monthly",
+                    ...getUtmParams(),
+                  })
+                }
               >
                 Subscribe
               </a>
@@ -120,35 +173,56 @@ function Services() {
               <span className="inline-block self-start rounded-full bg-accent-100 px-3 py-0.5 text-xs font-semibold text-accent-700">
                 Popular
               </span>
-              <h3 className="mt-2 text-lg font-semibold text-brand-900">Marketing retainer — Growth</h3>
+              <h3 className="mt-2 text-lg font-semibold text-brand-900">
+                Marketing retainer — Growth
+              </h3>
               <p className="mt-1 text-3xl font-bold text-brand-800">
-                $4,000<span className="text-base font-normal text-gray-500">/mo</span>
+                $4,000
+                <span className="text-base font-normal text-gray-500">/mo</span>
               </p>
               <p className="mt-2 text-sm text-gray-600 flex-1">
-                Multi-channel strategy with higher content volume. For growing teams that need pipeline across channels.
+                Multi-channel strategy with higher content volume. For growing
+                teams that need pipeline across channels.
               </p>
               <a
                 href="https://buy.stripe.com/6oU14n2fQ4gt1sSci73sI01"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary mt-4 w-full text-center text-sm"
+                onClick={() =>
+                  capturePostHog("channelforge_pricing_plan_clicked", {
+                    plan_name: "Marketing retainer — Growth",
+                    plan_price: 4000,
+                    plan_interval: "monthly",
+                    ...getUtmParams(),
+                  })
+                }
               >
                 Subscribe
               </a>
             </div>
             <div className="card flex flex-col">
-              <h3 className="text-lg font-semibold text-brand-900">Campaign package — Launch Sprint</h3>
-              <p className="mt-1 text-3xl font-bold text-brand-800">
-                $2,500
-              </p>
+              <h3 className="text-lg font-semibold text-brand-900">
+                Campaign package — Launch Sprint
+              </h3>
+              <p className="mt-1 text-3xl font-bold text-brand-800">$2,500</p>
               <p className="mt-2 text-sm text-gray-600 flex-1">
-                A full campaign, start to finish, in one focused sprint. Product launches, seasonal pushes, new channel tests.
+                A full campaign, start to finish, in one focused sprint. Product
+                launches, seasonal pushes, new channel tests.
               </p>
               <a
                 href="https://buy.stripe.com/8x29ATg6GdR33B0eqf3sI02"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-secondary mt-4 w-full text-center text-sm"
+                onClick={() =>
+                  capturePostHog("channelforge_pricing_plan_clicked", {
+                    plan_name: "Campaign package — Launch Sprint",
+                    plan_price: 2500,
+                    plan_interval: "one_time",
+                    ...getUtmParams(),
+                  })
+                }
               >
                 Buy now
               </a>
@@ -189,7 +263,10 @@ function Services() {
                     </h4>
                     <ul className="mt-4 space-y-3">
                       {svc.features.map((f) => (
-                        <li key={f} className="flex items-start gap-3 text-sm text-gray-700">
+                        <li
+                          key={f}
+                          className="flex items-start gap-3 text-sm text-gray-700"
+                        >
                           <svg
                             className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500"
                             fill="none"
@@ -224,7 +301,17 @@ function Services() {
             fits your budget and timeline.
           </p>
           <div className="mt-8">
-            <Link to="/contact" className="btn-primary text-base">
+            <Link
+              to="/contact"
+              className="btn-primary text-base"
+              onClick={() =>
+                capturePostHog("channelforge_services_cta_clicked", {
+                  cta_text: "Get a recommendation",
+                  cta_location: "services_footer",
+                  ...getUtmParams(),
+                })
+              }
+            >
               Get a recommendation
             </Link>
           </div>

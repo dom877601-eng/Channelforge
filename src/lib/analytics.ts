@@ -1,12 +1,4 @@
-declare global {
-  interface Window {
-    posthog?: {
-      capture: (event: string, properties?: Record<string, unknown>) => void;
-      init: (key: string, config?: Record<string, unknown>) => void;
-      debug: () => void;
-    };
-  }
-}
+import posthog from "posthog-js";
 
 /**
  * Capture a custom PostHog event. Safe to call on the server — no-ops gracefully.
@@ -15,8 +7,20 @@ export function capturePostHog(
   event: string,
   properties?: Record<string, unknown>,
 ): void {
-  if (typeof window !== "undefined" && window.posthog) {
-    window.posthog.capture(event, properties);
+  if (typeof window !== "undefined") {
+    posthog.capture(event, properties);
+  }
+}
+
+/**
+ * Identify a user in PostHog. Call after a user provides their info (e.g. contact form submit).
+ */
+export function identifyPostHog(
+  distinctId: string,
+  properties?: Record<string, unknown>,
+): void {
+  if (typeof window !== "undefined") {
+    posthog.identify(distinctId, properties);
   }
 }
 

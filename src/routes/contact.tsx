@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { capturePostHog, getUtmParams } from "~/lib/analytics";
+import { capturePostHog, getUtmParams, identifyPostHog } from "~/lib/analytics";
 
 // Server-side handler: stores contact form submissions in the shared database
 const submitContact = createServerFn({ method: "POST" }).handler(
@@ -33,10 +33,30 @@ const submitContact = createServerFn({ method: "POST" }).handler(
         { encoding: "utf-8" },
       );
 
+      const { getPostHogClient } = await import("~/utils/posthog-server");
+      const posthog = getPostHogClient();
+      posthog.identify({
+        distinctId: email,
+        properties: { name, company },
+      });
+      posthog.capture({
+        distinctId: email,
+        event: "channelforge_contact_saved",
+        properties: {
+          company,
+          budget_range: budget || "not_provided",
+          source: "server",
+        },
+      });
+      await posthog.flush();
+
       return { success: true };
     } catch (err) {
       console.error("Failed to save contact:", err);
-      return { success: false, error: "Something went wrong. Please try again later." };
+      return {
+        success: false,
+        error: "Something went wrong. Please try again later.",
+      };
     }
   },
 );
@@ -71,7 +91,9 @@ function Contact() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -84,6 +106,10 @@ function Contact() {
     try {
       const result = await submitContact(formData);
       if (result.success) {
+        identifyPostHog(formData.email, {
+          name: formData.name,
+          company: formData.company,
+        });
         capturePostHog("channelforge_form_submitted", {
           form_id: "contact-main",
           form_type: "contact",
@@ -138,30 +164,60 @@ function Contact() {
               <div className="mt-8 space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-brand-900">Email</h4>
-                    <p className="mt-0.5 text-sm text-gray-600">hello@channelforge.io</p>
+                    <h4 className="text-sm font-semibold text-brand-900">
+                      Email
+                    </h4>
+                    <p className="mt-0.5 text-sm text-gray-600">
+                      hello@channelforge.io
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-brand-900">Phone</h4>
-                    <p className="mt-0.5 text-sm text-gray-600">1-800-CHANNEL</p>
+                    <h4 className="text-sm font-semibold text-brand-900">
+                      Phone
+                    </h4>
+                    <p className="mt-0.5 text-sm text-gray-600">
+                      1-800-CHANNEL
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-10 rounded-xl border border-gray-100 bg-gray-50 p-6">
-                <h4 className="text-sm font-semibold text-brand-900">What happens next?</h4>
+                <h4 className="text-sm font-semibold text-brand-900">
+                  What happens next?
+                </h4>
                 <ol className="mt-4 space-y-3">
                   {[
                     "We review your info and goals within 24 hours",
@@ -169,7 +225,10 @@ function Contact() {
                     "We send you a custom proposal with budget breakdown",
                     "We onboard you and launch your first campaign within 2 weeks",
                   ].map((step, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
+                    <li
+                      key={i}
+                      className="flex items-start gap-3 text-sm text-gray-600"
+                    >
                       <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
                         {i + 1}
                       </span>
@@ -185,8 +244,18 @@ function Contact() {
               {submitted ? (
                 <div className="card border-green-200 bg-green-50/50 text-center">
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
-                    <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    <svg
+                      className="h-8 w-8"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.5 12.75l6 6 9-13.5"
+                      />
                     </svg>
                   </div>
                   <h3 className="mt-4 text-xl font-semibold text-brand-900">
@@ -194,7 +263,9 @@ function Contact() {
                   </h3>
                   <p className="mt-2 text-gray-600">
                     We've received your information and will be in touch at{" "}
-                    <span className="font-medium text-brand-700">{formData.email}</span>{" "}
+                    <span className="font-medium text-brand-700">
+                      {formData.email}
+                    </span>{" "}
                     within 24 hours.
                   </p>
                 </div>
@@ -215,7 +286,10 @@ function Contact() {
 
                   <div className="mt-6 grid gap-6 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-brand-900">
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-brand-900"
+                      >
                         Full name
                       </label>
                       <input
@@ -231,7 +305,10 @@ function Contact() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-brand-900">
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-brand-900"
+                      >
                         Email address
                       </label>
                       <input
@@ -248,7 +325,10 @@ function Contact() {
                   </div>
 
                   <div className="mt-5">
-                    <label htmlFor="company" className="block text-sm font-medium text-brand-900">
+                    <label
+                      htmlFor="company"
+                      className="block text-sm font-medium text-brand-900"
+                    >
                       Company name
                     </label>
                     <input
@@ -264,8 +344,12 @@ function Contact() {
                   </div>
 
                   <div className="mt-5">
-                    <label htmlFor="budget" className="block text-sm font-medium text-brand-900">
-                      Monthly marketing budget <span className="text-gray-400">(optional)</span>
+                    <label
+                      htmlFor="budget"
+                      className="block text-sm font-medium text-brand-900"
+                    >
+                      Monthly marketing budget{" "}
+                      <span className="text-gray-400">(optional)</span>
                     </label>
                     <select
                       id="budget"
@@ -283,7 +367,10 @@ function Contact() {
                   </div>
 
                   <div className="mt-5">
-                    <label htmlFor="message" className="block text-sm font-medium text-brand-900">
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-brand-900"
+                    >
                       What are your marketing goals?
                     </label>
                     <textarea
@@ -305,8 +392,18 @@ function Contact() {
                       className="btn-primary w-full text-base disabled:opacity-60"
                     >
                       {submitting ? "Sending..." : "Send request"}
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.75 9.42a.75.75 0 011.08-.06L12 15l7.17-5.64a.75.75 0 011.08.06L18 12l-3 2.25" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 12L3.75 9.42a.75.75 0 011.08-.06L12 15l7.17-5.64a.75.75 0 011.08.06L18 12l-3 2.25"
+                        />
                       </svg>
                     </button>
                   </div>

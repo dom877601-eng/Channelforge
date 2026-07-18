@@ -1,5 +1,6 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { blogPosts } from "~/data/blog-posts";
+import { capturePostHog, getUtmParams } from "~/lib/analytics";
 
 export const Route = createFileRoute("/blog/$slug")({
   component: BlogArticle,
@@ -34,8 +35,18 @@ function BlogArticle() {
             to="/blog"
             className="inline-flex items-center gap-1 text-sm font-medium text-gray-400 transition-colors hover:text-white"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+              />
             </svg>
             Back to blog
           </Link>
@@ -100,7 +111,10 @@ function BlogArticle() {
             // Handle bold headings (**)
             if (line.startsWith("**") && line.endsWith("**")) {
               return (
-                <p key={i} className="mb-2 mt-6 text-base font-bold text-brand-900">
+                <p
+                  key={i}
+                  className="mb-2 mt-6 text-base font-bold text-brand-900"
+                >
                   {line.replace(/\*\*/g, "")}
                 </p>
               );
@@ -109,11 +123,17 @@ function BlogArticle() {
             if (line.includes("**")) {
               const parts = line.split(/(\*\*[^*]+\*\*)/g);
               return (
-                <p key={i} className="mb-4 text-base leading-relaxed text-gray-700">
+                <p
+                  key={i}
+                  className="mb-4 text-base leading-relaxed text-gray-700"
+                >
                   {parts.map((part, j) => {
                     if (part.startsWith("**") && part.endsWith("**")) {
                       return (
-                        <strong key={j} className="font-semibold text-brand-900">
+                        <strong
+                          key={j}
+                          className="font-semibold text-brand-900"
+                        >
                           {part.slice(2, -2)}
                         </strong>
                       );
@@ -129,7 +149,10 @@ function BlogArticle() {
             }
             // Regular paragraph
             return (
-              <p key={i} className="mb-4 text-base leading-relaxed text-gray-700">
+              <p
+                key={i}
+                className="mb-4 text-base leading-relaxed text-gray-700"
+              >
                 {line}
               </p>
             );
@@ -140,18 +163,36 @@ function BlogArticle() {
       {/* ─── CTA ─── */}
       <section className="bg-gray-50 py-20">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="section-heading">
-            Ready to stop being the hub?
-          </h2>
+          <h2 className="section-heading">Ready to stop being the hub?</h2>
           <p className="section-subheading mx-auto">
-            If marketing keeps slipping to next week, let's talk. We'll show
-            you what a month with ChannelForge looks like.
+            If marketing keeps slipping to next week, let's talk. We'll show you
+            what a month with ChannelForge looks like.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link to="/contact" className="btn-primary text-base">
+            <Link
+              to="/contact"
+              className="btn-primary text-base"
+              onClick={() =>
+                capturePostHog("channelforge_blog_cta_clicked", {
+                  cta_text: "Get started",
+                  post_slug: slug,
+                  ...getUtmParams(),
+                })
+              }
+            >
               Get started
             </Link>
-            <Link to="/services" className="btn-secondary text-base">
+            <Link
+              to="/services"
+              className="btn-secondary text-base"
+              onClick={() =>
+                capturePostHog("channelforge_blog_cta_clicked", {
+                  cta_text: "See our services",
+                  post_slug: slug,
+                  ...getUtmParams(),
+                })
+              }
+            >
               See our services
             </Link>
           </div>
